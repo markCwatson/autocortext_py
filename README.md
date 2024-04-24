@@ -4,22 +4,26 @@ This is a cimple client for the AutoCortext API.
 
 ### Setup
 
-1. A `.env` file with the variable `AUTOCORTEXT_API_KEY` set to a valid key.
-2. An organization ID
+1. An `.env` file with the variable `AUTOCORTEXT_API_KEY` set to a valid key.
+1. An `.env` file with the variable `AUTOCORTEXT_ORG_ID` set to a valid organization ID.
 
 ### Example
 
+Install the AutoCortext clinet using `pip`.
+
+```shell
+pip istall autocortext_py
+```
+
+Use the client in your source code.
+
 ```python
-import autocortext
-import json
+from autocortext_py import AutoCortext
+import os
 
-msg = '[{ "id":1, "content":"How can I help you?" ,"role":"assistant"}, { "id":2, "content":"Why is the sky blue?","role":"user"}]'
+query = '[{ "id":1, "content":"How can I help you?" ,"role":"assistant"}, { "id":2, "content":"Why is the sky blue?","role":"user"}]'
 
-client = autocortext.AutoCortext(organization_id="12345")
-res = client.troubleshoot(msg)
-
-msgs = json.loads(res)
-for msg in msgs:
-    if msg["id"] == 3 and msg["role"] == "assistant":
-        print(msg["content"])
+client = AutoCortext()
+res = client.troubleshoot(query)
+print(res)
 ```

@@ -12,11 +12,13 @@ setup(
     packages=find_packages(),
     install_requires=[
         "requests",
+        "os",
     ],
     classifiers=[
-        "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3",
+        "Operating System :: MacOS :: MacOS X",
+        "Operating System :: Microsoft :: Windows",
     ],
     python_requires=">=3.6",
 )
