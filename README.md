@@ -1,6 +1,6 @@
 ## AutoCortext API CLient
 
-This is a cimple client for the AutoCortext API.
+This is a simple client for the AutoCortext API.
 
 ### Setup
 
@@ -12,7 +12,7 @@ This is a cimple client for the AutoCortext API.
 Install the AutoCortext clinet using `pip`.
 
 ```shell
-pip istall autocortext_py
+pip istall autocortext-py
 ```
 
 Use the client in your source code.

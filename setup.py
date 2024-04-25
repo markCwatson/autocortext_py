@@ -18,8 +18,7 @@ setup(
     classifiers=[
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
-        "Operating System :: MacOS :: MacOS X",
-        "Operating System :: Microsoft :: Windows",
+        "Operating System :: OS Independent",
     ],
     python_requires=">=3.6",
 )
