@@ -18,8 +18,8 @@ pip install autocortext-py
 Use the client in your source code.
 
 ```python
-from autocortext_py import AutoCortext
 import os
+from autocortext_py import AutoCortext
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -30,10 +30,10 @@ client = AutoCortext(
 )
 
 query = [
-    {"id": 1, "content": "How can I help you?", "role": "assistant"},
+    {"id": 1, "content": "AutoCortext: How can I help you?", "role": "assistant"},
     {
         "id": 2,
-        "content": "The 24 volt system in the conveyor is not powering on.",
+        "content": "User: The 24 volt system in the conveyor is not powering on.",
         "role": "user",
     },
 ]

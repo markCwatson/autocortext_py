@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="autocortext_py",
-    version="0.1.9",
+    version="0.1.11",
     description="Simple client for AutoCortext API",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",

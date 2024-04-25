@@ -3,7 +3,28 @@ import json
 
 
 class AutoCortext:
+    """
+    A client for interacting with the AutoCortext API.
+
+    This class provides methods to send messages and receive responses from the AutoCortext API.
+
+    Attributes:
+        org_id (str): The organization ID required for API requests.
+        api_key (str): The API key used for secure communication with the API.
+        base_url (str): The base URL for the API endpoints.
+    """
+
     def __init__(self, org_id, api_key):
+        """
+        Initializes the AutoCortext client with necessary authentication credentials.
+
+        Args:
+            org_id (str): The organization ID for the API.
+            api_key (str): The API key for accessing the API.
+
+        Raises:
+            ValueError: If either org_id or api_key is not provided.
+        """
         if not org_id:
             raise ValueError("Organization ID must be provided and cannot be empty.")
         if not api_key:
@@ -17,9 +38,25 @@ class AutoCortext:
         }
 
     def troubleshoot(self, message):
-        # Convert message to a Python dict if it's not already one
+        """
+        Sends a troubleshooting message to the API and returns the response.
+
+        The method expects a message in the form of a string or a dictionary and sends it
+        as a JSON payload to the API's troubleshooting endpoint.
+
+        Args:
+            message (str or dict): The message or context to be sent for troubleshooting.
+
+        Returns:
+            str: The response from the API, typically containing troubleshooting information.
+
+        Raises:
+            ValueError: If the message is neither a string nor a dictionary.
+            JSONDecodeError: If the response from the API is not valid JSON.
+        """
         if isinstance(message, str):
             try:
+                # Convert message to a Python dict if it's not already one
                 message = json.loads(message)
             except json.JSONDecodeError:
                 raise ValueError("Message must be a valid JSON string or a dictionary.")
@@ -31,7 +68,7 @@ class AutoCortext:
             message.append(
                 {
                     "id": max_id + 1,
-                    "content": "Also, please keep your response as short as possible.",
+                    "content": "User: Also, please keep your response as short as possible.",
                     "role": "user",
                 }
             )
