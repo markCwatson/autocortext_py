@@ -1,4 +1,4 @@
-## AutoCortext API CLient
+## Simple AutoCortext API Client
 
 This is a simple client for the AutoCortext API.
 
