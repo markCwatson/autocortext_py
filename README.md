@@ -12,7 +12,7 @@ This is a simple client for the AutoCortext API.
 Install the AutoCortext clinet using `pip`.
 
 ```shell
-pip istall autocortext-py
+pip install autocortext-py
 ```
 
 Use the client in your source code.
@@ -20,10 +20,24 @@ Use the client in your source code.
 ```python
 from autocortext_py import AutoCortext
 import os
+from dotenv import load_dotenv
 
-query = '[{ "id":1, "content":"How can I help you?" ,"role":"assistant"}, { "id":2, "content":"Why is the sky blue?","role":"user"}]'
+load_dotenv()
 
-client = AutoCortext()
+client = AutoCortext(
+    org_id=os.getenv("AUTOCORTEXT_ORG_ID"),
+    api_key=os.getenv("AUTOCORTEXT_API_KEY"),
+)
+
+query = [
+    {"id": 1, "content": "How can I help you?", "role": "assistant"},
+    {
+        "id": 2,
+        "content": "The 24 volt system in the conveyor is not powering on.",
+        "role": "user",
+    },
+]
+
 res = client.troubleshoot(query)
 print(res)
 ```
