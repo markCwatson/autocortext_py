@@ -9,6 +9,7 @@ setup(
     author="Mark Watson",
     author_email="markus.c.watson@gmail.com",
     url="https://autocortext.com",
+    keywords=["autocortext"],
     packages=find_packages(),
     install_requires=[
         "requests",
