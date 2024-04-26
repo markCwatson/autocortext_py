@@ -259,3 +259,22 @@ class AutoCortext:
             return "OK"
         else:
             return f"Error: {response.status_code} - {response.text}"
+
+    def clear(self):
+        """
+        Clear the history of messages exchanged with the AutoCortext API.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+        self.history = [
+            {
+                "id": 1,
+                "content": f"Auto Cortext: Hello sir/madam.\n\nToday's date is {datetime.datetime.now().date()}, and the local time is {datetime.datetime.now().time().strftime('%H:%M:%S')}. \n\nWhat machine are you having trouble with?",
+                "role": "assistant",
+            }
+        ]
+        print("[autocortext_py] History cleared.")
