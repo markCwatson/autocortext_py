@@ -262,7 +262,7 @@ class AutoCortext:
 
     def clear(self):
         """
-        Clear the history of messages exchanged with the AutoCortext API.
+        Clear the history of messages exchanged with the AutoCortext API, the verbosity mode, the machine name, and the system.
 
         Args:
             None
@@ -270,6 +270,10 @@ class AutoCortext:
         Returns:
             None
         """
+        self.configured = False
+        self.system = "Not specified"
+        self.machine = "Not specified"
+        self.verbosity = "concise"
         self.history = [
             {
                 "id": 1,
