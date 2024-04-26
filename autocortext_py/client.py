@@ -1,5 +1,6 @@
 import requests
 import json
+import datetime
 
 
 class AutoCortext:
@@ -30,6 +31,16 @@ class AutoCortext:
         if not api_key:
             raise ValueError("API key must be provided and cannot be empty.")
 
+        self.system = "Not specified"
+        self.machine = "Not specified"
+        self.verbosity = "concise"
+        self.history = [
+            {
+                "id": 1,
+                "content": f"Auto Cortext: Hello sir/madam.\n\nToday's date is {datetime.datetime.now().date()}, and the local time is {datetime.datetime.now().time().strftime('%H:%M:%S')}. \n\nWhat machine are you having trouble with?",
+                "role": "assistant",
+            }
+        ]
         self.base_url = "https://ascend-six.vercel.app/"
         self.org_id = org_id
         self.headers = {
@@ -37,15 +48,81 @@ class AutoCortext:
             "Content-Type": "application/json",
         }
 
+    def config(self, machine=None, verbosity=None, system=None):
+        """
+        Configures the AutoCortext client with machine name and verbosity level.
+
+        This method allows you to set the name of the machine or system being troubleshooted
+        and the verbosity level of the responses from the AutoCortext API.
+
+        Args:
+            machine (str): The name of the machine or system being troubleshooted.
+            verbosity (str): The verbosity level of the responses. Must be either "concise" or "verbose".
+            system (str): The system or software being troubleshooted.
+
+        Returns:
+            None
+
+        Raises:
+            ValueError: If the machine name and verbosity are not provided or are not strings.
+            ValueError: If the verbosity level is not "concise" or "verbose".
+        """
+        if not machine:
+            raise ValueError("Machine name must be provided and cannot be empty.")
+        if not verbosity:
+            raise ValueError("Verbosity must be provided and cannot be empty.")
+        if not isinstance(machine, str):
+            raise ValueError("Machine name must be a string.")
+        if not isinstance(verbosity, str):
+            raise ValueError("Verbosity must be a string.")
+        if verbosity not in ["concise", "verbose"]:
+            raise ValueError("Verbosity must be either 'concise' or 'verbose'.")
+        if not system:
+            raise ValueError("System name must be provided and cannot be empty.")
+        if not isinstance(system, str):
+            raise ValueError("System name must be a string.")
+
+        self.machine = machine
+        self.verbosity = verbosity
+        self.system = system
+
+        print(f"[autocortext_py] Machine set to {machine}.")
+        print(f"[autocortext_py] Verbosity set to {verbosity}.")
+        print(f"[autocortext_py] System set to {system}.")
+
+        # add required prompts
+        new_messages = [
+            {
+                "id": 2,
+                "content": f"User: The user selected the {machine}.",
+                "role": "user",
+            },
+            {
+                "id": 3,
+                "content": f"Auto Cortext: Great! What system in the {machine} are you having issues with?",
+                "role": "assistant",
+            },
+            {
+                "id": 4,
+                "content": f"User: The user is having trouble with the {system} system.",
+                "role": "user",
+            },
+            {
+                "id": 5,
+                "content": f"Auto Cortext: OK, tell me about the problem you are experiencing with the {system} in the {machine}.",
+            },
+        ]
+
+        self.history += new_messages
+
     def troubleshoot(self, message):
         """
         Sends a troubleshooting message to the API and returns the response.
 
-        The method expects a message in the form of a string or a dictionary and sends it
-        as a JSON payload to the API's troubleshooting endpoint.
+        The method expects a message in the form of a string.
 
         Args:
-            message (str or dict): The message or context to be sent for troubleshooting.
+            message (str): The message to be sent for troubleshooting.
 
         Returns:
             str: The response from the API, typically containing troubleshooting information.
@@ -54,32 +131,24 @@ class AutoCortext:
             ValueError: If the message is neither a string nor a dictionary.
             JSONDecodeError: If the response from the API is not valid JSON.
         """
-        if isinstance(message, str):
-            try:
-                # Convert message to a Python dict if it's not already one
-                message = json.loads(message)
-            except json.JSONDecodeError:
-                raise ValueError("Message must be a valid JSON string or a dictionary.")
+        if not isinstance(message, str):
+            raise ValueError("Message must be a valid string.")
 
-        # Ensure message is a list of dicts
-        if isinstance(message, list) and all(isinstance(m, dict) for m in message):
-            # Find the highest current ID and add 1
-            max_id = max(msg["id"] for msg in message) if message else 0
-            message.append(
-                {
-                    "id": max_id + 1,
-                    "content": "User: Also, please keep your response as short as possible.",
-                    "role": "user",
-                }
-            )
-        else:
-            raise ValueError(
-                "Message must be a list of dictionaries with at least an 'id' key."
-            )
+        # Add the message to the history (merge with existing history)
+        max_id = max(msg["id"] for msg in self.history)
+        new_msg = [
+            {
+                "id": max_id + 1,
+                "content": f"User: {message}. {'*!* Also, please keep your response as short as possible.' if self.verbosity == 'concise' else '*!*  Also, give as much detail as possible, but use plain text only, no markdown formatting.'}",
+                "role": "user",
+            }
+        ]
+        self.history += new_msg
 
         # Convert the list of messages into a single context string
-        context = "\n".join(msg["content"] for msg in message)
+        context = "\n".join(msg["content"] for msg in self.history)
 
+        print("[autocortext_py] Sending context to server. Please wait...")
         response = requests.post(
             f"{self.base_url}/api/read?companyId={self.org_id}",
             headers=self.headers,
@@ -88,9 +157,99 @@ class AutoCortext:
 
         if response.status_code == 200:
             try:
+                print("[autocortext_py] Response received. Processing...")
                 response_data = response.json()
-                return response_data.get("data", "No data found")
+                content = response_data.get("data", "No data found")
+
+                # Add the response to the history
+                formatted_response = {
+                    "id": max_id + 1,
+                    "content": "Auto Cortext: " + content,
+                    "role": "assistant",
+                }
+
+                self.history.append(formatted_response)
+                return content
+
             except json.JSONDecodeError:
                 return "Invalid JSON response"
+        else:
+            return f"Error: {response.status_code} - {response.text}"
+
+    def set_verbosity(self, mode):
+        """
+        Set the verbosity of the AutoCortext client.
+
+        The verbosity can be either "concise" or "verbose". In "concise" mode, AutoCortext will keep
+        the response short and sweet. In "verbose" mode, AutoCortext will provide more detailed responses.
+
+        Args:
+            mode (str): The mode to set the client to. Must be either "concise" or "verbose".
+
+        Raises:
+            ValueError: If the mode is not a string or not "concise" or "verbose".
+        """
+        if not isinstance(mode, str):
+            raise ValueError("Mode must be a string.")
+
+        if mode not in ["concise", "verbose"]:
+            raise ValueError("Mode must be either 'concise' or 'verbose'.")
+
+        print(f"[autocortext_py] Verbosity set to {mode}.")
+        self.verbosity = mode
+
+    def set_machine(self, machine):
+        """
+        Set the machine name for the AutoCortext client.
+
+        This method allows you to specify the name of the machine or system that is being troubleshooted.
+
+        Args:
+            machine (str): The name of the machine or system being troubleshooted.
+
+        Returns:
+            None
+
+        Raises:
+            ValueError: If the machine name is not provided or is not a string.
+        """
+        if not machine:
+            raise ValueError("Machine name must be provided and cannot be empty.")
+
+        if not isinstance(machine, str):
+            raise ValueError("Machine name must be a string.")
+
+        print(f"[autocortext_py] Machine set to {machine}.")
+        self.machine = machine
+
+    def save(self):
+        """
+        Save the history of messages exchanged with the AutoCortext API to a the remote server.
+
+        This history will be viewable at https://ascend-six.vercel.app/dashboard/troubleshoot
+
+        Args:
+            None
+
+        Returns:
+            str: A message indicating the status of the save operation.
+        """
+        context = {
+            "machine": self.machine,
+            "messages": self.history,
+            "companyId": self.org_id,
+            "summarize": False,
+        }
+
+        print("[autocortext_py] Saving history to server. Please wait...")
+        response = requests.post(
+            f"{self.base_url}/api/history",
+            headers=self.headers,
+            json=context,
+        )
+
+        if response.status_code == 200:
+            print("[autocortext_py] History saved successfully.")
+            return "OK"
         else:
             return f"Error: {response.status_code} - {response.text}"

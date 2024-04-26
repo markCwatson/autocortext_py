@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="autocortext_py",
-    version="0.1.11",
+    version="0.3.1",
     description="Simple client for AutoCortext API",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
@@ -13,6 +13,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         "requests",
+        "datetime",
     ],
     classifiers=[
         "License :: OSI Approved :: MIT License",

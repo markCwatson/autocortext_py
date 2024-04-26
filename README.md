@@ -29,15 +29,14 @@ client = AutoCortext(
     api_key=os.getenv("AUTOCORTEXT_API_KEY"),
 )
 
-query = [
-    {"id": 1, "content": "AutoCortext: How can I help you?", "role": "assistant"},
-    {
-        "id": 2,
-        "content": "User: The 24 volt system in the conveyor is not powering on.",
-        "role": "user",
-    },
-]
+client.config(verbosity="concise", machine="Conveyor System", system="Electrical")
 
-res = client.troubleshoot(query)
+res = client.troubleshoot("The 24 volt system in the conveyor is not powering on.")
 print(res)
+
+client.set_verbosity("verbose")
+res = client.troubleshoot("OK how do I fix it?")
+print(res)
+
+client.save()
 ```
