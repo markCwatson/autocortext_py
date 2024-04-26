@@ -31,6 +31,7 @@ class AutoCortext:
         if not api_key:
             raise ValueError("API key must be provided and cannot be empty.")
 
+        self.configured = False
         self.system = "Not specified"
         self.machine = "Not specified"
         self.verbosity = "concise"
@@ -64,9 +65,13 @@ class AutoCortext:
             None
 
         Raises:
+            ValueError: If the AutoCortext client is already configured.
             ValueError: If the machine name and verbosity are not provided or are not strings.
             ValueError: If the verbosity level is not "concise" or "verbose".
         """
+        if self.configured:
+            raise ValueError("AutoCortext client is already configured.")
+
         if not machine:
             raise ValueError("Machine name must be provided and cannot be empty.")
         if not verbosity:
@@ -114,6 +119,7 @@ class AutoCortext:
         ]
 
         self.history += new_messages
+        self.configured = True
 
     def troubleshoot(self, message):
         """
