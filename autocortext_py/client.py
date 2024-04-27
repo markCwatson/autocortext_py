@@ -31,16 +31,28 @@ class AutoCortext:
         if not api_key:
             raise ValueError("API key must be provided and cannot be empty.")
 
+        self.audience_map = {
+            "Technician": "You are a tool for troubleshooting issues with manufacturing equipment. Your target audience is technicians who are responsible for maintaining and repairing machinery. Your responses should be technical but not too detailed, providing step-by-step instructions and explanations.",
+            "Engineer": "You are a tool for troubleshooting issues with manufacturing equipment. Your target audience is engineers who are responsible for process design and technical support to technicians. Your responses should be technical but highly. Use data, science, and statistics whenever possible.",
+            "Maintenance": "You are a tool for troubleshooting issues with manufacturing equipment. Your target audience is maintenance personnel. Your responses should be practical and easy to understand, focusing on troubleshooting and repair procedures.",
+        }
+
         self.configured = False
         self.system = "Not specified"
         self.machine = "Not specified"
         self.verbosity = "concise"
+        self.response_type = "Technician"
         self.history = [
             {
                 "id": 1,
+                "context": self.audience_map[self.response_type],
+                "role": "system",
+            },
+            {
+                "id": 2,
                 "content": f"Auto Cortext: Hello sir/madam.\n\nToday's date is {datetime.datetime.now().date()}, and the local time is {datetime.datetime.now().time().strftime('%H:%M:%S')}. \n\nWhat machine are you having trouble with?",
                 "role": "assistant",
-            }
+            },
         ]
         self.base_url = "https://ascend-six.vercel.app/"
         self.org_id = org_id
@@ -49,25 +61,27 @@ class AutoCortext:
             "Content-Type": "application/json",
         }
 
-    def config(self, machine=None, verbosity=None, system=None):
+    def config(self, verbosity=None, machine=None, system=None, response_type=None):
         """
         Configures the AutoCortext client with machine name and verbosity level.
 
-        This method allows you to set the name of the machine or system being troubleshooted
-        and the verbosity level of the responses from the AutoCortext API.
+        This method allows you to set the name of the machine and system being troubleshooted, the
+        verbosity level of the responses from the AutoCortext API, and the response type.
 
         Args:
-            machine (str): The name of the machine or system being troubleshooted.
             verbosity (str): The verbosity level of the responses. Must be either "concise" or "verbose".
+            machine (str): The name of the machine or system being troubleshooted.
             system (str): The system or software being troubleshooted.
+            response_type (str): The type of response to be given by the assistant. Must be either "Technician", "Engineer", or "Maintenance".
 
         Returns:
             None
 
         Raises:
             ValueError: If the AutoCortext client is already configured.
-            ValueError: If the machine name and verbosity are not provided or are not strings.
+            ValueError: If the machine name, system, verbosity, or response_type are not provided or are not strings.
             ValueError: If the verbosity level is not "concise" or "verbose".
+            ValueError: If the response type is not "Technician", "Engineer", or "Maintenance".
         """
         if self.configured:
             raise ValueError("AutoCortext client is already configured.")
@@ -76,44 +90,57 @@ class AutoCortext:
             raise ValueError("Machine name must be provided and cannot be empty.")
         if not verbosity:
             raise ValueError("Verbosity must be provided and cannot be empty.")
+        if not system:
+            raise ValueError("System name must be provided and cannot be empty.")
+        if not response_type:
+            raise ValueError("Response type must be provided and cannot be empty.")
         if not isinstance(machine, str):
             raise ValueError("Machine name must be a string.")
         if not isinstance(verbosity, str):
             raise ValueError("Verbosity must be a string.")
-        if verbosity not in ["concise", "verbose"]:
-            raise ValueError("Verbosity must be either 'concise' or 'verbose'.")
-        if not system:
-            raise ValueError("System name must be provided and cannot be empty.")
         if not isinstance(system, str):
             raise ValueError("System name must be a string.")
+        if not isinstance(response_type, str):
+            raise ValueError("Response type must be a string.")
+        if verbosity not in ["concise", "verbose"]:
+            raise ValueError("Verbosity must be either 'concise' or 'verbose'.")
+        if response_type not in ["Technician", "Engineer", "Maintenance"]:
+            raise ValueError(
+                "Response type must be either 'Technician', 'Engineer', or 'Maintenance'."
+            )
 
         self.machine = machine
         self.verbosity = verbosity
         self.system = system
+        self.response_type = response_type
 
         print(f"[autocortext_py] Machine set to {machine}.")
         print(f"[autocortext_py] Verbosity set to {verbosity}.")
         print(f"[autocortext_py] System set to {system}.")
+        print(f"[autocortext_py] Response type set to {response_type}.")
+
+        # update the response type in the history
+        self.history[0]["context"] = self.audience_map[self.response_type]
 
         # add required prompts
         new_messages = [
             {
-                "id": 2,
+                "id": 3,
                 "content": f"User: The user selected the {machine}.",
                 "role": "user",
             },
             {
-                "id": 3,
+                "id": 4,
                 "content": f"Auto Cortext: Great! What system in the {machine} are you having issues with?",
                 "role": "assistant",
             },
             {
-                "id": 4,
+                "id": 5,
                 "content": f"User: The user is having trouble with the {system} system.",
                 "role": "user",
             },
             {
-                "id": 5,
+                "id": 6,
                 "content": f"Auto Cortext: OK, tell me about the problem you are experiencing with the {system} in the {machine}.",
             },
         ]

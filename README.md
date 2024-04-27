@@ -29,7 +29,12 @@ client = AutoCortext(
     api_key=os.getenv("AUTOCORTEXT_API_KEY"),
 )
 
-client.config(verbosity="concise", machine="Conveyor System", system="Electrical")
+client.config(
+    verbosity="concise",
+    machine="Conveyor System",
+    system="Electrical",
+    response_type="Technician",
+)
 
 res = client.troubleshoot("The 24 volt system in the conveyor is not powering on.")
 print(res)
