@@ -94,6 +94,7 @@ class AutoCortext:
             raise ValueError("System name must be provided and cannot be empty.")
         if not response_type:
             raise ValueError("Response type must be provided and cannot be empty.")
+
         if not isinstance(machine, str):
             raise ValueError("Machine name must be a string.")
         if not isinstance(verbosity, str):
@@ -102,6 +103,7 @@ class AutoCortext:
             raise ValueError("System name must be a string.")
         if not isinstance(response_type, str):
             raise ValueError("Response type must be a string.")
+
         if verbosity not in ["concise", "verbose"]:
             raise ValueError("Verbosity must be either 'concise' or 'verbose'.")
         if response_type not in ["Technician", "Engineer", "Maintenance"]:
@@ -254,6 +256,63 @@ class AutoCortext:
 
         print(f"[autocortext_py] Machine set to {machine}.")
         self.machine = machine
+
+    def set_system(self, system):
+        """
+        Set the system for the AutoCortext client.
+
+        This method allows you to specify the system that is being troubleshooted.
+
+        Args:
+            system (str): The system or software being troubleshooted.
+
+        Returns:
+            None
+
+        Raises:
+            ValueError: If the system name is not provided or is not a string.
+        """
+        if not system:
+            raise ValueError("System name must be provided and cannot be empty.")
+
+        if not isinstance(system, str):
+            raise ValueError("System name must be a string.")
+
+        print(f"[autocortext_py] System set to {system}.")
+        self.system = system
+
+    def set_response_type(self, response_type):
+        """
+        Set the response type for the AutoCortext client.
+
+        This method allows you to specify the type of response to be given by AutoCortext.
+
+        Args:
+            response_type (str): The type of response to be given by AutoCortext. Must be either "Technician", "Engineer", or "Maintenance".
+
+        Returns:
+            None
+
+        Raises:
+            ValueError: If the response type is not provided or is not a string.
+            ValueError: If the response type is not "Technician", "Engineer", or "Maintenance".
+        """
+        if not response_type:
+            raise ValueError("Response type must be provided and cannot be empty.")
+
+        if not isinstance(response_type, str):
+            raise ValueError("Response type must be a string.")
+
+        if response_type not in ["Technician", "Engineer", "Maintenance"]:
+            raise ValueError(
+                "Response type must be either 'Technician', 'Engineer', or 'Maintenance'."
+            )
+
+        print(f"[autocortext_py] Response type set to {response_type}.")
+        self.response_type = response_type
+
+        # update the response type in the history
+        self.history[0]["context"] = self.audience_map[self.response_type]
 
     def save(self):
         """
