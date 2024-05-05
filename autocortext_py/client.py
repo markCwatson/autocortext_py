@@ -43,7 +43,7 @@ class AutoCortext:
                 "role": "assistant",
             },
         ]
-        self.base_url = "http://localhost:3000/"  # "https://ascend-six.vercel.app/"
+        self.base_url = "https://ascend-six.vercel.app/"
         self.org_id = org_id
         self.headers = {
             "Authorization": f"Bearer {api_key}",
