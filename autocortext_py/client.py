@@ -31,12 +31,6 @@ class AutoCortext:
         if not api_key:
             raise ValueError("API key must be provided and cannot be empty.")
 
-        self.audience_map = {
-            "Technician": "You are a tool for troubleshooting issues with manufacturing equipment. Your target audience is technicians who are responsible for maintaining and repairing machinery. Your responses should be technical but not too detailed, providing step-by-step instructions and explanations.",
-            "Engineer": "You are a tool for troubleshooting issues with manufacturing equipment. Your target audience is engineers who are responsible for process design and technical support to technicians. Your responses should be technical but highly. Use data, science, and statistics whenever possible.",
-            "Maintenance": "You are a tool for troubleshooting issues with manufacturing equipment. Your target audience is maintenance personnel. Your responses should be practical and easy to understand, focusing on troubleshooting and repair procedures.",
-        }
-
         self.configured = False
         self.system = "Not specified"
         self.machine = "Not specified"
@@ -45,16 +39,11 @@ class AutoCortext:
         self.history = [
             {
                 "id": 1,
-                "context": self.audience_map[self.response_type],
-                "role": "system",
-            },
-            {
-                "id": 2,
                 "content": f"Auto Cortext: Hello sir/madam.\n\nToday's date is {datetime.datetime.now().date()}, and the local time is {datetime.datetime.now().time().strftime('%H:%M:%S')}. \n\nWhat machine are you having trouble with?",
                 "role": "assistant",
             },
         ]
-        self.base_url = "https://ascend-six.vercel.app/"
+        self.base_url = "http://localhost:3000/"  # "https://ascend-six.vercel.app/"
         self.org_id = org_id
         self.headers = {
             "Authorization": f"Bearer {api_key}",
@@ -121,28 +110,25 @@ class AutoCortext:
         print(f"[autocortext_py] System set to {system}.")
         print(f"[autocortext_py] Response type set to {response_type}.")
 
-        # update the response type in the history
-        self.history[0]["context"] = self.audience_map[self.response_type]
-
         # add required prompts
         new_messages = [
             {
-                "id": 3,
+                "id": 2,
                 "content": f"User: The user selected the {machine}.",
                 "role": "user",
             },
             {
-                "id": 4,
+                "id": 3,
                 "content": f"Auto Cortext: Great! What system in the {machine} are you having issues with?",
                 "role": "assistant",
             },
             {
-                "id": 5,
-                "content": f"User: The user is having trouble with the {system} system.",
+                "id": 4,
+                "content": f"User: The user is having issues with the {system} system.",
                 "role": "user",
             },
             {
-                "id": 6,
+                "id": 5,
                 "content": f"Auto Cortext: OK, tell me about the problem you are experiencing with the {system} in the {machine}.",
             },
         ]
@@ -174,20 +160,21 @@ class AutoCortext:
         new_msg = [
             {
                 "id": max_id + 1,
-                "content": f"User: {message}. {'*!* Also, please keep your response as short as possible.' if self.verbosity == 'concise' else '*!*  Also, give as much detail as possible, but use plain text only, no markdown formatting.'}",
+                "content": f"User: {message}.",
                 "role": "user",
             }
         ]
         self.history += new_msg
 
-        # Convert the list of messages into a single context string
-        context = "\n".join(msg["content"] for msg in self.history)
-
         print("[autocortext_py] Sending context to server. Please wait...")
         response = requests.post(
             f"{self.base_url}/api/read?companyId={self.org_id}",
             headers=self.headers,
-            json=context,
+            json={
+                "messages": self.history,
+                "verbosity": self.verbosity,
+                "audience": self.response_type,
+            },
         )
 
         if response.status_code == 200:
