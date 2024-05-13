@@ -15,14 +15,13 @@ class AutoCortext:
         base_url (str): The base URL for the API endpoints.
     """
 
-    def __init__(self, org_id, api_key, env="prod"):
+    def __init__(self, org_id, api_key):
         """
         Initializes the AutoCortext client with necessary authentication credentials.
 
         Args:
             org_id (str): The organization ID for the API.
             api_key (str): The API key for accessing the API.
-            env (str): The environment to use. Must be either "prod" or "dev".
 
         Raises:
             ValueError: If either org_id or api_key is not provided.
@@ -31,8 +30,6 @@ class AutoCortext:
             raise ValueError("Organization ID must be provided and cannot be empty.")
         if not api_key:
             raise ValueError("API key must be provided and cannot be empty.")
-        if env not in ["prod", "dev"]:
-            raise ValueError("Environment must be either 'prod' or 'dev'.")
 
         self.configured = False
         self.system = "Not specified"
@@ -46,18 +43,16 @@ class AutoCortext:
                 "role": "assistant",
             },
         ]
-        self.base_url = (
-            "https://ascend-six.vercel.app/"
-            if env == "prod"
-            else "https://ascend-git-develop-ascend-engineering.vercel.app/"
-        )
+        self.base_url = "https://ascend-six.vercel.app/"
         self.org_id = org_id
         self.headers = {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
         }
 
-    def config(self, verbosity=None, machine=None, system=None, response_type=None):
+    def config(
+        self, verbosity=None, machine=None, system=None, response_type=None, env="prod"
+    ):
         """
         Configures the AutoCortext client with machine name and verbosity level.
 
@@ -69,6 +64,7 @@ class AutoCortext:
             machine (str): The name of the machine or system being troubleshooted.
             system (str): The system or software being troubleshooted.
             response_type (str): The type of response to be given by the assistant. Must be either "Technician", "Engineer", or "Maintenance".
+            env (str): The environment to use. Must be either "prod" or "dev".
 
         Returns:
             None
@@ -90,6 +86,8 @@ class AutoCortext:
             raise ValueError("System name must be provided and cannot be empty.")
         if not response_type:
             raise ValueError("Response type must be provided and cannot be empty.")
+        if env not in ["prod", "dev"]:
+            raise ValueError("Environment must be either 'prod' or 'dev'.")
 
         if not isinstance(machine, str):
             raise ValueError("Machine name must be a string.")
@@ -111,11 +109,17 @@ class AutoCortext:
         self.verbosity = verbosity
         self.system = system
         self.response_type = response_type
+        self.base_url = (
+            "https://ascend-six.vercel.app/"
+            if env == "prod"
+            else "https://ascend-git-develop-ascend-engineering.vercel.app/"
+        )
 
         print(f"[autocortext_py] Machine set to {machine}.")
         print(f"[autocortext_py] Verbosity set to {verbosity}.")
         print(f"[autocortext_py] System set to {system}.")
         print(f"[autocortext_py] Response type set to {response_type}.")
+        print(f"[autocortext_py] Environment set to {env}.")
 
         # add required prompts
         new_messages = [
@@ -354,6 +358,7 @@ class AutoCortext:
         self.system = "Not specified"
         self.machine = "Not specified"
         self.verbosity = "concise"
+        self.base_url = "https://ascend-six.vercel.app/"
         self.history = [
             {
                 "id": 1,

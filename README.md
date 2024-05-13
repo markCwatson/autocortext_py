@@ -34,6 +34,7 @@ client.config(
     machine="Conveyor System",
     system="Electrical",
     response_type="Technician",
+    env="prod",
 )
 
 res = client.troubleshoot("The 24 volt system in the conveyor is not powering on.")
