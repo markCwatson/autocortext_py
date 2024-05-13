@@ -15,13 +15,14 @@ class AutoCortext:
         base_url (str): The base URL for the API endpoints.
     """
 
-    def __init__(self, org_id, api_key):
+    def __init__(self, org_id, api_key, env="prod"):
         """
         Initializes the AutoCortext client with necessary authentication credentials.
 
         Args:
             org_id (str): The organization ID for the API.
             api_key (str): The API key for accessing the API.
+            env (str): The environment to use. Must be either "prod" or "dev".
 
         Raises:
             ValueError: If either org_id or api_key is not provided.
@@ -30,6 +31,8 @@ class AutoCortext:
             raise ValueError("Organization ID must be provided and cannot be empty.")
         if not api_key:
             raise ValueError("API key must be provided and cannot be empty.")
+        if env not in ["prod", "dev"]:
+            raise ValueError("Environment must be either 'prod' or 'dev'.")
 
         self.configured = False
         self.system = "Not specified"
@@ -43,7 +46,11 @@ class AutoCortext:
                 "role": "assistant",
             },
         ]
-        self.base_url = "https://ascend-six.vercel.app/"
+        self.base_url = (
+            "https://ascend-six.vercel.app/"
+            if env == "prod"
+            else "https://ascend-git-develop-ascend-engineering.vercel.app/"
+        )
         self.org_id = org_id
         self.headers = {
             "Authorization": f"Bearer {api_key}",
